@@ -74,10 +74,10 @@ public class Start {
 		        
 		        
 		    // load our input image
-		        Mat img = Imgcodecs.imread("E:\\akila\\11.jpg", Imgcodecs.IMREAD_COLOR); // dining_table.jpg soccer.jpg baggage_claim.jpg
+		        Mat img = Imgcodecs.imread("E:\\prajwal\\11.jpg", Imgcodecs.IMREAD_COLOR); // dining_table.jpg soccer.jpg baggage_claim.jpg
 		        System.out.println("Image Loaded");
 		        //  -- determine  the output layer names that we need from YOLO
-		        // The forward() function in OpenCVís Net class needs the ending layer till which it should run in the network.
+		        // The forward() function in OpenCV‚Äôs Net class needs the ending layer till which it should run in the network.
 		        //  getUnconnectedOutLayers() vraca indexe za: yolo_82, yolo_94, yolo_106, (index su 82, 94 i 106) i to su poslednji layeri
 		        // u network u:
 		        List<String> layerNames = dnnNet.getLayerNames();
@@ -92,7 +92,7 @@ public class Start {
 		        ArrayList<Float> confidences = (ArrayList<Float>) result.get("confidences");
 		        ArrayList<Integer> class_ids = (ArrayList<Integer>)result.get("class_ids");
 		        
-		        // -- Now , do so-called ìnon-maxima suppressionî
+		        // -- Now , do so-called ‚Äúnon-maxima suppression‚Äù
 		        //Non-maximum suppression is performed on the boxes whose confidence is equal to or greater than the threshold.
 		        // This will reduce the number of overlapping boxes:
 		        MatOfInt indices =  getBBoxIndicesFromNonMaximumSuppression(boxes,confidences);
