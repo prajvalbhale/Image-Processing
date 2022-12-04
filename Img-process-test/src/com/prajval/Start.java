@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
@@ -22,16 +21,17 @@ import org.opencv.dnn.Net;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.osgi.OpenCVNativeLoader;
 import org.opencv.utils.Converters;
 
 public class Start {
 //	private static final Logger logger = (Logger) LoggerFactory.getLogger(Start.class);
 
-	
-		public void detectObjectOnImage() throws FileNotFoundException
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public void detectObjectOnImage() throws FileNotFoundException, ClassNotFoundException, NullPointerException
 		{ 
 			nu.pattern.OpenCV.loadLocally();
+			String DDLPath = "C:\\opencv\\build\\java\\x64\\opencv_java460.dll";
+			System.load(DDLPath);
 			//System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 			//System.load("opencv-460");
 			//Loader.load(org.bytedeco.opencv.opencv_java.class);
@@ -47,13 +47,12 @@ public class Start {
 		    System.out.println("before the loading of YOLO files");
 		    //  load our YOLO object detector trained on COCO dataset
 		    
-		    System.load(Start.class.getResource("/dlls/Start.dll")
-		            .getPath());
 		    
-		    String LoadCfgFile = "E:\\Img Detection cfg files\\darknet\\cfg\\yolov2.cfg"; 
-		    String LoadWeightFile = "E:\\Img Detection cfg files\\Yolo files\\yolov2.weights";
+		    
+		    String LoadCfgFile = "C:\\Users\\PRAJVAL BHALE\\Documents\\Yolo files\\yolov4.cfg"; 
+		    String LoadWeightFile = "C:\\Users\\PRAJVAL BHALE\\Documents\\Yolo files\\yolov4.weights";
 		    System.out.println("YOLO file's Loaded");
-		    
+		    System.out.println("before the Dnn");
 		    Net dnnNet = Dnn.readNet(LoadWeightFile, LoadCfgFile);
 		    System.out.println("YOLO file's Passed");
 		    
@@ -75,12 +74,12 @@ public class Start {
 		        
 		        
 		    // load our input image
-		        Mat img = Imgcodecs.imread("E:/Img Detection cfg files/images/frutes.png", Imgcodecs.IMREAD_COLOR); // dining_table.jpg soccer.jpg baggage_claim.jpg
+		        Mat img = Imgcodecs.imread("E:\\akila\\11.jpg", Imgcodecs.IMREAD_COLOR); // dining_table.jpg soccer.jpg baggage_claim.jpg
 		        System.out.println("Image Loaded");
 		        //  -- determine  the output layer names that we need from YOLO
 		        // The forward() function in OpenCV’s Net class needs the ending layer till which it should run in the network.
-		        //  getUnconnectedOutLayers() vraca indexe za: yolo_82, yolo_94, yolo_106, (indexi su 82, 94 i 106) i to su poslednji layeri
-		        // u networku:
+		        //  getUnconnectedOutLayers() vraca indexe za: yolo_82, yolo_94, yolo_106, (index su 82, 94 i 106) i to su poslednji layeri
+		        // u network u:
 		        List<String> layerNames = dnnNet.getLayerNames();
 		        List<String> outputLayers = new ArrayList<String>();
 		        for (Integer i : dnnNet.getUnconnectedOutLayers().toList()) 
@@ -96,8 +95,8 @@ public class Start {
 		        // -- Now , do so-called “non-maxima suppression”
 		        //Non-maximum suppression is performed on the boxes whose confidence is equal to or greater than the threshold.
 		        // This will reduce the number of overlapping boxes:
-		        MatOfInt indices =  getBBoxIndicesFromNonMaximumSuppression(boxes,
-		                                                                    confidences);
+		        MatOfInt indices =  getBBoxIndicesFromNonMaximumSuppression(boxes,confidences);
+		        
 		        //-- Finally, go over indices in order to draw bounding boxes on the image:
 		        img =  drawBoxesOnTheImage(img,
 		                                   indices,
@@ -109,8 +108,9 @@ public class Start {
 		        HighGui.waitKey(10000);     
 		}
 	
-		
-		private HashMap<String, List> forwardImageOverNetwork(Mat img,
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		private HashMap<String, List> forwardImageOverNetwork(
+				Mat img,
 	            Net dnnNet,
 	            List<String> outputLayers) 
 		{
@@ -135,15 +135,18 @@ public class Start {
 				// -- the output from network's forward() method will contain a List of OpenCV Mat object, so lets prepare one
 				List<Mat> outputs = new ArrayList<Mat>();
 
-				// -- Finally, let pass forward throught network. The main work is done here:  
+				// -- Finally, let pass forward through network. The main work is done here:  
 				dnnNet.forward(outputs, outputLayers);
 
-				// --Each output of the network outs (ie, each row of the Mat from 'outputs') is represented by a vector of the number
-				// of classes + 5 elements.  The first 4 elements represent center_x, center_y, width and height.
-				// The fifth element represents the confidence that the bounding box encloses the object.
-				// The remaining elements are the confidence levels (ie object types) associated with each class.
-				// The box is assigned to the category corresponding to the highest score of the box:
-
+				/*
+				 * Each output of the network outs (i.e, each row of the Mat from 'outputs') is represented by a vector of the number
+				 * of classes + 5 elements.  The first 4 elements represent center_x, center_y, width and height.
+				 * The fifth element represents the confidence that the bounding box encloses the object.
+				 * The remaining elements are the confidence levels (ie object types) associated with each class.
+				 * The box is assigned to the category corresponding to the highest score of the box:
+				**/
+				
+				Rect2d box = null;
 				for(Mat output : outputs) 
 				{
 					//  loop over each of the detections. Each row is a candidate detection,
@@ -153,7 +156,7 @@ public class Start {
 						Mat row = output.row(i);
 						List<Float> detect = new MatOfFloat(row).toList();
 						List<Float> score = detect.subList(5, output.cols());
-						int class_id = argmax(score); // index maximalnog elementa liste
+						int class_id = argmax(score); // index maximalnog element list
 						float conf = score.get(class_id);
 							if (conf >= 0.5) 
 							{
@@ -163,14 +166,25 @@ public class Start {
 								int height = (int) (detect.get(3) * img.rows());
 								int x = (center_x - width / 2);
 								int y = (center_y - height / 2);
-								Rect2d box = new Rect2d(x, y, width, height);
+								box = new Rect2d(x, y, width, height);
+								//Rect2d box = new Rect2d(x, y, width, height);
 								result.get("boxes").add(box);
 								result.get("confidences").add(conf);
 								result.get("class_ids").add(class_id);
 							}
 					}
+					
+					
+					//this will save crop image
+				    Mat markedImage = new Mat();
+				    Imgcodecs.imwrite("E:\\output\\crop2.png",markedImage);
+				    System.out.println("Crop File Saved to This Path :-- E:\\output\\crop1.jpg");
+					
+				    // Saving the output image
+				    Imgcodecs.imwrite("E:\\output\\out.jpg", img);
+				    System.out.println("Output Saved");
 				}
-				return result;
+				return result;				
 		}
 
 		/**
@@ -192,7 +206,8 @@ public class Start {
 		}
 
 
-		private MatOfInt getBBoxIndicesFromNonMaximumSuppression(ArrayList<Rect2d> boxes,
+		private MatOfInt getBBoxIndicesFromNonMaximumSuppression(
+				ArrayList<Rect2d> boxes,
 				ArrayList<Float> confidences ) 
 		{
 				MatOfRect2d mOfRect = new MatOfRect2d();
@@ -204,7 +219,10 @@ public class Start {
 				return result;
 		}
 
-		private Mat drawBoxesOnTheImage(Mat img, MatOfInt indices,
+		@SuppressWarnings("rawtypes")
+		private Mat drawBoxesOnTheImage(
+				Mat img, 
+				MatOfInt indices,
 				ArrayList<Rect2d> boxes,
 				List<String> cocoLabels,
 				ArrayList<Integer> class_ids,
@@ -225,6 +243,7 @@ public class Start {
 							Imgproc.putText(img, label, text_point, Imgproc.FONT_HERSHEY_SIMPLEX, 1, colors.get(class_ids.get(i)), 2);
 						}
 				}  
-				return img;
-			}			
-	}
+				return img;	
+				
+		}
+}
