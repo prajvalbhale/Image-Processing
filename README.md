@@ -31,7 +31,7 @@ After Identifing It will Crop and Save Them Auto.
 		        
 		        
     		    load our input image
-		        Mat img = Imgcodecs.imread("E:\\akila\\11.jpg", Imgcodecs.IMREAD_COLOR); // dining_table.jpg soccer.jpg baggage_claim.jpg
+		        Mat img = Imgcodecs.imread("E:\\prajwal\\11.jpg", Imgcodecs.IMREAD_COLOR); // dining_table.jpg soccer.jpg baggage_claim.jpg
 		        
             Determine the output layer names that we need from YOLO, The forward() function in OpenCV’s Net class needs the ending 
             layer till which it should run in the network.
